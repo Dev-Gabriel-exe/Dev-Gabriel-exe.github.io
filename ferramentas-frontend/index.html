@@ -118,6 +118,23 @@ section[id],header[id]{scroll-margin-top:calc(var(--nav-h,68px) + 14px)}
 .u-btn{width:120px;height:120px;border-radius:28px;border:0;background:#111;color:#fff;font-weight:900;box-shadow:8px 8px 0 #ff5f2e;transition:.25s}.u-btn:hover{transform:translate(7px,7px);box-shadow:1px 1px 0 #ff5f2e}.u-loader{width:78px;height:78px;border:10px solid #eee;border-top-color:#3157ff;border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.u-toggle{width:120px;height:56px;border-radius:999px;background:#ddd;position:relative}.u-toggle:after{content:"";position:absolute;width:46px;height:46px;border-radius:50%;background:#fff;top:5px;left:5px;box-shadow:0 3px 10px #0003;animation:toggle 2.3s ease-in-out infinite alternate}@keyframes toggle{to{left:69px;background:#ffd84b}}
 
 
+/* Unlumen UI-inspired Dock — recriação didática, sem copiar o componente original */
+.unlumen-scene{background:radial-gradient(circle at 50% 20%,#243055 0,#10131d 56%,#080a0f 100%);color:#fff;align-content:center;justify-content:center}
+.unlumen-scene:before{content:"";position:absolute;inset:0;background:linear-gradient(120deg,transparent 0 42%,rgba(113,134,255,.12) 48%,transparent 55%),radial-gradient(circle at 18% 76%,rgba(255,95,46,.16),transparent 25%);pointer-events:none}
+.unlumen-demo{position:relative;z-index:2;display:grid;gap:28px;justify-items:center;width:min(90%,660px)}
+.unlumen-copy{text-align:center}.unlumen-copy b{display:block;font-size:clamp(30px,4vw,54px);letter-spacing:-.055em}.unlumen-copy span{font:700 11px var(--mono);letter-spacing:.11em;text-transform:uppercase;color:#b9c3ff}
+.unlumen-dock-wrap{position:relative;padding:62px 28px 20px;max-width:100%;overflow:visible}
+.unlumen-dock{display:flex;align-items:flex-end;justify-content:center;gap:9px;padding:10px 12px;border-radius:25px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.09);backdrop-filter:blur(22px);box-shadow:0 24px 70px rgba(0,0,0,.38),inset 0 1px rgba(255,255,255,.13)}
+.unlumen-item{--dock-scale:1;--dock-y:0px;position:relative;width:56px;height:56px;display:grid;place-items:center;border:0;border-radius:16px;color:#fff;background:linear-gradient(145deg,rgba(255,255,255,.2),rgba(255,255,255,.055));box-shadow:inset 0 0 0 1px rgba(255,255,255,.1),0 8px 24px rgba(0,0,0,.25);cursor:pointer;transform-origin:50% 100%;transform:translateY(var(--dock-y)) scale(var(--dock-scale));will-change:transform;transition:box-shadow .2s ease,background .2s ease}
+.unlumen-item:hover,.unlumen-item:focus-visible{outline:none;background:linear-gradient(145deg,rgba(114,135,255,.48),rgba(255,255,255,.08));box-shadow:inset 0 0 0 1px rgba(255,255,255,.26),0 14px 34px rgba(0,0,0,.36)}
+.unlumen-item svg{width:25px;height:25px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+.unlumen-item .dock-label{position:absolute;bottom:calc(100% + 13px);left:50%;transform:translate(-50%,8px);opacity:0;white-space:nowrap;font:800 10px var(--sans);letter-spacing:.02em;color:#141414;background:#fff;padding:6px 9px;border-radius:9px;box-shadow:0 8px 24px #0004;pointer-events:none;transition:.18s ease}
+.unlumen-item:hover .dock-label,.unlumen-item:focus-visible .dock-label{opacity:1;transform:translate(-50%,0)}
+.unlumen-hint{font:700 10px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:#929bbd;text-align:center}
+@media(max-width:700px){.unlumen-dock{gap:5px;padding:8px}.unlumen-item{width:44px;height:44px;border-radius:13px}.unlumen-item svg{width:21px;height:21px}.unlumen-dock-wrap{padding-inline:0}.unlumen-copy b{font-size:30px}}
+@media(prefers-reduced-motion:reduce){.unlumen-item{transform:none!important}}
+
+
 /* Details Vault + MicroKit + Bencho lab */
 .microdetails{background:#fff}
 .microdetails-head{display:grid;grid-template-columns:1.2fr .8fr;gap:30px;align-items:end;margin-bottom:34px}
@@ -407,6 +424,25 @@ footer{background:#111319;color:#fff;padding:70px 0 34px}.foot-grid{display:grid
     <article class="demo-card">
       <div class="scene uiverse-scene"><button class="u-btn">hover me</button><div class="u-loader"></div><div class="u-toggle"></div></div>
       <div class="cap"><div><h3>Uiverse — pequenos detalhes</h3><p>Botões, loaders, toggles, cards e inputs. Excelente para estudar CSS e Tailwind copiando e desmontando o código.</p></div><a href="https://uiverse.io/" target="_blank" rel="noreferrer">explorar ↗</a></div>
+    </article>
+    <article class="demo-card" id="unlumenDemoCard">
+      <div class="scene unlumen-scene">
+        <div class="unlumen-demo">
+          <div class="unlumen-copy"><span>Unlumen UI • Dock</span><b>Proximidade vira movimento.</b></div>
+          <div class="unlumen-dock-wrap" id="unlumenDockWrap">
+            <div class="unlumen-dock" id="unlumenDock" role="toolbar" aria-label="Demonstração de Dock com magnificação">
+              <button class="unlumen-item" aria-label="Início"><span class="dock-label">Início</span><svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10.5V20h13v-9.5"/><path d="M9.5 20v-6h5v6"/></svg></button>
+              <button class="unlumen-item" aria-label="Explorar"><span class="dock-label">Explorar</span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="m14.7 9.3-2 5.4-5.4 2 2-5.4 5.4-2Z"/></svg></button>
+              <button class="unlumen-item" aria-label="Projetos"><span class="dock-label">Projetos</span><svg viewBox="0 0 24 24"><path d="M3.5 7.5h6l1.7 2H20.5v9.5H3.5Z"/><path d="M3.5 7.5V5h6l1.7 2.5"/></svg></button>
+              <button class="unlumen-item" aria-label="Criar"><span class="dock-label">Criar</span><svg viewBox="0 0 24 24"><path d="M12 3v18M3 12h18"/></svg></button>
+              <button class="unlumen-item" aria-label="Favoritos"><span class="dock-label">Favoritos</span><svg viewBox="0 0 24 24"><path d="m12 3 2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.3-4.1 5.9-.9L12 3Z"/></svg></button>
+              <button class="unlumen-item" aria-label="Perfil"><span class="dock-label">Perfil</span><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.2"/><path d="M5.5 20c.8-4 3-6 6.5-6s5.7 2 6.5 6"/></svg></button>
+            </div>
+          </div>
+          <div class="unlumen-hint">passe o cursor • os vizinhos também respondem</div>
+        </div>
+      </div>
+      <div class="cap"><div><h3>Unlumen UI — Dock com spring</h3><p>Recriação didática do padrão: o item mais próximo cresce e os vizinhos acompanham suavemente. O componente real é React/shadcn e fica editável no projeto.</p></div><a href="https://ui.unlumen.com/components/dock" target="_blank" rel="noreferrer">abrir Dock ↗</a></div>
     </article>
       </div>
     </div>
@@ -873,6 +909,7 @@ const TOOLS = [
  {name:'Motion.dev',url:'https://motion.dev/',cat:'Motion / scroll',status:'free',badge:'core open source',what:'Biblioteca de animação para React, JavaScript e Vue. Tem scroll-linked, gestures, layout, text, drag, carousels e exemplos.',free:'A biblioteca principal é open source. Motion+ vende exemplos e conteúdo premium.',when:'Quando o projeto é React e você quer animação declarativa, entrada/saída, hover, drag, layout e scroll.',use:'Comece por scroll-triggered e scroll-linked; depois use variantes e layout animations.',vibe:'parallax • text reveal • zoom hero'},
  {name:'GSAP + ScrollTrigger',url:'https://gsap.com/docs/v3/Plugins/ScrollTrigger/',cat:'Motion / scroll',status:'free',badge:'biblioteca',what:'Controle preciso de timelines, SVG, texto e rolagem. ScrollTrigger liga animações ao scroll com trigger, scrub, pin e snap.',free:'Uso da biblioteca e plugins está amplamente disponível; revise a licença para cenários de redistribuição específicos.',when:'Sites cinematográficos, storytelling por rolagem, pinning e sequências sincronizadas.',use:'Crie uma timeline curta; conecte ao ScrollTrigger; teste em mobile e reduced-motion.',vibe:'cinematic • pin • scrub'},
  {name:'React Bits',url:'https://reactbits.dev/',cat:'Componentes animados',status:'free',badge:'200+ efeitos',what:'Coleção de componentes React animados e customizáveis: texto, backgrounds, UI, cursores, 3D e microinterações.',free:'Gratuito para uso pessoal/comercial com MIT + Commons Clause; não revenda a biblioteca como biblioteca.',when:'Landing pages e portfólios que precisam de personalidade rapidamente.',use:'Copie um componente, reduza props e cores, depois adapte ao design system do projeto.',vibe:'blur text • split text • backgrounds'},
+ {name:'Unlumen UI',url:'https://ui.unlumen.com/components',cat:'Componentes animados',status:'freemium',badge:'React + shadcn',what:'Coleção de componentes e primitives React/shadcn com motion refinado: Dock, Cursor Image Trail, Tilt Card, Motion Navigation, backgrounds e outros padrões.',free:'Há uma seleção relevante marcada como Free, incluindo Dock, Cursor Image Trail, Tilt Card, Motion FAQ e outros; componentes Pro ficam nos planos pagos.',when:'Quando o projeto já usa React/shadcn e você quer microinterações polidas sem transformar a página em uma coleção de efeitos.',use:'Abra um componente Free, instale pelo registry do shadcn e ajuste cores, intensidade do spring, distância e conteúdo para o seu design system.',vibe:'dock • spring • cursor trail • shadcn'},
  {name:'Details Vault',url:'https://www.details.so/',cat:'Referências / prompts',status:'freemium',badge:'inspo + vault',what:'Biblioteca curada de detalhes de sites reais e um Vault de transições, botões e seções com implementação pronta. Também oferece MCP para levar as referências ao agente de IA.',free:'Starter permite explorar referências recentes, previews do Vault e recursos gratuitos selecionados. O Vault completo, código e MCP avançado ficam nos planos pagos.',when:'Quando você não quer começar por uma biblioteca genérica: primeiro encontre uma direção visual e um detalhe de interação que realmente combine com o projeto.',use:'Pesquise pelo detalhe específico — hero, preloader, pinned scroll, cursor, page transition — e adapte a ideia em vez de copiar a identidade do site original.',vibe:'inspo • transitions • thinking orbs'},
  {name:'MicroKit UI',url:'https://microkit.co/',cat:'Componentes animados',status:'free',badge:'49 interações MIT',what:'Biblioteca de microinterações copy-paste para React, CSS e Tailwind: cursor glow, magnetic fill, text swap, tabs, hover toolbar e scrub number field.',free:'Open source sob MIT. O catálogo atual reúne 49 interações; muitas não exigem dependência além do próprio código.',when:'Quando o site já está funcional, mas botões, inputs e navegação ainda parecem “sem vida”.',use:'Pegue uma microinteração por vez e aplique em um componente importante; depois teste teclado, touch e reduced-motion.',vibe:'cursor glow • scrub • text swap'},
  {name:'Bencho',url:'https://bencho.dev/',cat:'Componentes animados',status:'free',badge:'47 blocos MIT',what:'Bancada de blocos interativos reais: você pressiona, arrasta, desliza, seleciona e ajusta parâmetros antes de copiar o código.',free:'Todos os blocos/código entregues pelo Bencho são MIT e podem ser usados comercialmente; a marca e o site em si não são parte da licença.',when:'Para ensinar interfaces táteis: slide-to-confirm, dynamic island, time scrubber, image compare, drag, radial menu e outros padrões que dependem de gesto.',use:'Teste o bloco no próprio site, entenda qual gesto ele resolve e só então leve o padrão ao projeto.',vibe:'drag • press • morph • tactile'},
@@ -1090,6 +1127,43 @@ window.addEventListener('DOMContentLoaded',()=>{
     if(type==='type'){stage.innerHTML='<div class="scramble-output" id="typeOut"></div>';const target='motion + layout + mídia + intenção';let i=0;const el=document.getElementById('typeOut');const timer=setInterval(()=>{el.innerHTML=target.slice(0,i)+'<span class="type-caret"></span>';i++;if(i>target.length)clearInterval(timer)},65)}
   }
   buttons.forEach(b=>b.addEventListener('click',()=>runEffect(b.dataset.effect)));runEffect('split');
+
+  // Unlumen UI-inspired Dock — magnificação gaussiana por proximidade com suavização tipo spring
+  (()=>{
+    const dock=document.getElementById('unlumenDock');if(!dock)return;
+    const items=[...dock.querySelectorAll('.unlumen-item')];
+    const state=items.map(()=>({scale:1,y:0,targetScale:1,targetY:0}));
+    let active=false,raf=0;
+    const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const targets=(clientX)=>{
+      const rect=dock.getBoundingClientRect();
+      items.forEach((item,i)=>{
+        const r=item.getBoundingClientRect(),cx=r.left+r.width/2;
+        const d=Math.abs(clientX-cx);
+        const influence=Math.exp(-Math.pow(d/92,2));
+        state[i].targetScale=1+(reduced?0:.72*influence);
+        state[i].targetY=reduced?0:-18*influence;
+      });
+    };
+    const reset=()=>state.forEach(v=>{v.targetScale=1;v.targetY=0});
+    const frame=()=>{
+      let moving=false;
+      state.forEach((v,i)=>{
+        v.scale+=(v.targetScale-v.scale)*.18;v.y+=(v.targetY-v.y)*.18;
+        items[i].style.setProperty('--dock-scale',v.scale.toFixed(3));items[i].style.setProperty('--dock-y',v.y.toFixed(2)+'px');
+        if(Math.abs(v.targetScale-v.scale)>.002||Math.abs(v.targetY-v.y)>.05)moving=true;
+      });
+      if(active||moving)raf=requestAnimationFrame(frame);else raf=0;
+    };
+    const ensure=()=>{if(!raf)raf=requestAnimationFrame(frame)};
+    dock.addEventListener('pointermove',e=>{active=true;targets(e.clientX);ensure()});
+    dock.addEventListener('pointerleave',()=>{active=false;reset();ensure()});
+    dock.addEventListener('pointerdown',e=>{targets(e.clientX);ensure()});
+    items.forEach((item,i)=>{
+      item.addEventListener('focus',()=>{active=true;const r=item.getBoundingClientRect();targets(r.left+r.width/2);ensure()});
+      item.addEventListener('blur',()=>{active=false;reset();ensure()});
+    });
+  })();
 
   // spotlight
   const card=document.getElementById('spotCard'); card.addEventListener('pointermove',e=>{const r=card.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;card.style.setProperty('--mx',x+'px');card.style.setProperty('--my',y+'px');const ry=(x/r.width-.5)*12,rx=-(y/r.height-.5)*12;card.style.transform=`perspective(700px) rotateX(${rx}deg) rotateY(${ry}deg)`}); card.addEventListener('pointerleave',()=>card.style.transform='');
