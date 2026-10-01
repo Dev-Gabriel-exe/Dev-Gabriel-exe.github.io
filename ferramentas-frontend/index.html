@@ -45,12 +45,14 @@ button,input,select{font:inherit}
 .progress{position:fixed;top:0;left:0;width:100%;height:4px;background:rgba(0,0,0,.08);z-index:1000}
 .progress span{display:block;width:0;height:100%;background:var(--orange);transform-origin:left center}
 .topbar{position:sticky;top:4px;z-index:900;background:rgba(246,242,233,.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
-.topbar-inner{max-width:1320px;margin:auto;padding:12px 22px;display:flex;align-items:center;gap:14px}
+.topbar-inner{max-width:1760px;margin:auto;padding:12px 22px;display:flex;align-items:center;gap:12px}
 .brand{font-weight:950;letter-spacing:-.04em;text-decoration:none;white-space:nowrap}.brand i{font-family:var(--serif);font-weight:400}
-.navlinks{display:flex;gap:7px;overflow:auto;scrollbar-width:none}.navlinks::-webkit-scrollbar{display:none}
-.navlinks a{font-size:12px;font-weight:800;text-decoration:none;border:1px solid var(--line);background:#fff9;padding:7px 10px;border-radius:999px;white-space:nowrap}
+.navlinks{display:flex;gap:7px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;min-width:0;flex:1;scroll-behavior:smooth;overscroll-behavior-x:contain}.navlinks::-webkit-scrollbar{display:none}
+.navlinks a{font-size:12px;font-weight:800;text-decoration:none;border:1px solid var(--line);background:#fff9;padding:7px 10px;border-radius:999px;white-space:nowrap;transition:.2s ease}.navlinks a.active{background:#151515;color:#fff;border-color:#151515}
 .navlinks a:hover{background:#fff;border-color:#aaa}
-.top-spacer{flex:1}
+.navlinks a.active,.navlinks a.active:hover{background:#151515;color:#fff;border-color:#151515}
+.nav-more{display:none;flex:none;width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:#fff;color:#111;font-weight:950;cursor:pointer;align-items:center;justify-content:center;box-shadow:0 5px 18px rgba(0,0,0,.08)}.topbar.nav-overflow .nav-more{display:inline-flex}.nav-more:hover{transform:translateY(-1px);border-color:#999}
+.top-spacer{display:none}
 .mode-btn{border:1px solid #222;background:#181818;color:#fff;border-radius:999px;padding:8px 12px;font-size:12px;font-weight:800;cursor:pointer}
 
 /* shared */
@@ -91,19 +93,18 @@ button,input,select{font:inherit}
 .tip-card{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);padding:24px}
 .tip-card h3{font-size:20px;margin:0 0 8px}.tip-card p{margin:0;color:var(--muted)}
 
-/* horizontal demo */
-.horizontal-stage{background:#111319;color:#fff;overflow:clip}
-.horizontal-head{padding:clamp(56px,7vh,80px) 22px 26px;max-width:1320px;margin:auto}
+/* horizontal demo — sticky nativo + scroll vertical -> deslocamento horizontal */
+.horizontal-stage{background:#111319;color:#fff;overflow:clip;position:relative}
+.horizontal-head{padding:clamp(64px,8vh,96px) 22px 34px;max-width:1320px;margin:auto;position:relative;z-index:2}
 .horizontal-head .eyebrow{color:#a9b6ff}.horizontal-head .lead{color:#cfd1d6}
-/* O texto introdutório rola normalmente. Só a área dos cartões é fixada.
-   Assim a seção nunca tenta encaixar título + parágrafo + cards na mesma viewport. */
-.horizontal-pin{position:relative;min-height:calc(100svh - 72px);display:flex;align-items:center;overflow:hidden}
-.h-track{display:flex;align-items:center;gap:22px;width:max-content;padding:28px 22px 40px}
-.demo-card{width:min(78vw,720px);height:min(520px,calc(100svh - 150px));min-height:400px;border-radius:34px;position:relative;overflow:hidden;flex:none;background:#f7f3eb;color:#111;border:1px solid #ffffff22;box-shadow:0 22px 70px rgba(0,0,0,.35)}
+.horizontal-shell{position:relative;width:100%;background:#111319}
+.horizontal-sticky{position:sticky;top:var(--nav-h,68px);height:calc(100svh - var(--nav-h,68px));min-height:520px;display:flex;align-items:center;overflow:hidden;background:#111319}
+.h-track{display:flex;align-items:center;gap:22px;width:max-content;padding:28px 22px 40px;will-change:transform;transform:translate3d(0,0,0)}
+.demo-card{width:min(78vw,720px);height:min(520px,calc(100svh - var(--nav-h,68px) - 64px));min-height:400px;border-radius:34px;position:relative;overflow:hidden;flex:none;background:#f7f3eb;color:#111;border:1px solid #ffffff22;box-shadow:0 22px 70px rgba(0,0,0,.35)}
 .demo-card .cap{position:absolute;left:22px;right:22px;bottom:22px;display:flex;justify-content:space-between;align-items:end;gap:18px;z-index:5;background:rgba(255,255,255,.84);backdrop-filter:blur(10px);border:1px solid #ffffffaa;border-radius:18px;padding:16px}
 .demo-card .cap h3{margin:0;font-size:24px;letter-spacing:-.04em}.demo-card .cap p{margin:3px 0 0;color:#555;font-size:13px;max-width:390px}.cap a{font-size:12px;font-weight:900;text-decoration:none;border-bottom:1px solid}
 .scene{position:absolute;inset:0;display:grid;place-items:center}
-
+section[id],header[id]{scroll-margin-top:calc(var(--nav-h,68px) + 14px)}
 /* individual demos */
 .zoom-scene{background:linear-gradient(135deg,#ebefff,#ffecdf)}
 .zoom-orb{width:130px;height:130px;border-radius:50%;background:#141414;box-shadow:0 0 0 28px #ff5f2e,0 0 0 56px #3157ff;will-change:transform}
@@ -306,12 +307,6 @@ footer{background:#111319;color:#fff;padding:70px 0 34px}.foot-grid{display:grid
 /* reveal utilities */
 .reveal{opacity:0;transform:translateY(26px)}
 .no-gsap .reveal{opacity:1;transform:none}
-.no-gsap .horizontal-stage{overflow:visible}
-.no-gsap .horizontal-pin{min-height:auto;overflow-x:auto;scroll-snap-type:x proximity;overscroll-behavior-x:contain}
-.no-gsap .h-track{padding-bottom:50px}
-.no-gsap .demo-card{scroll-snap-align:start}
-.no-gsap #zoomOrb{animation:offlinePulse 3.2s ease-in-out infinite alternate}
-@keyframes offlinePulse{to{transform:scale(1.35) rotate(55deg)}}
 
 @media(max-width:980px){
   .hero-row,.tip,.lab-grid,.foot-grid{grid-template-columns:1fr}
@@ -322,11 +317,11 @@ footer{background:#111319;color:#fff;padding:70px 0 34px}.foot-grid{display:grid
   .filters{grid-template-columns:1fr 1fr}.filters input{grid-column:1/-1}
 }
 @media(max-width:640px){
-  .topbar-inner{padding-inline:12px}.navlinks{display:none}.wrap{padding-inline:15px}.section{padding:72px 0}.hero-content{padding-inline:15px}.hero h1{font-size:58px}.hero-row{gap:18px}.demo-card{width:90vw;height:470px}.anatomy,.tool-grid,.mcp-grid,.challenge-grid,.flow-line,.filters{grid-template-columns:1fr}.catalog-tools{top:61px}.video-frame{min-height:660px}.video-copy{padding:34px 24px}.horizontal-head{padding-inline:15px}.horizontal-pin{min-height:auto;overflow:visible;display:block}.h-track{padding-inline:15px;display:grid;width:100%;gap:16px}.demo-card{width:100%;height:min(470px,calc(100svh - 110px));min-height:390px}
+  .topbar-inner{padding:8px 10px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px 10px}.brand{font-size:14px}.navlinks{display:flex;grid-column:1/-1;width:100%;padding-bottom:2px}.navlinks a{font-size:10px;padding:6px 8px}.nav-more{grid-column:2;grid-row:1;width:34px;height:34px}.top-spacer{display:none}.wrap{padding-inline:15px}.section{padding:72px 0}.hero-content{padding-inline:15px}.hero h1{font-size:58px}.hero-row{gap:18px}.demo-card{width:90vw;height:470px}.anatomy,.tool-grid,.mcp-grid,.challenge-grid,.flow-line,.filters{grid-template-columns:1fr}.catalog-tools{top:61px}.video-frame{min-height:660px}.video-copy{padding:34px 24px}.horizontal-head{padding-inline:15px}.horizontal-shell{height:auto!important}.horizontal-sticky{position:relative;top:auto;height:auto;min-height:0;display:block;overflow:visible}.h-track{padding-inline:15px;padding-bottom:54px;display:grid;width:100%;gap:16px;transform:none!important}.demo-card{width:100%;height:min(470px,calc(100svh - 110px));min-height:390px}
 }
 @media(max-height:760px) and (min-width:641px){
-  .horizontal-pin{min-height:calc(100svh - 64px)}
-  .demo-card{height:min(440px,calc(100svh - 120px));min-height:360px}
+  .horizontal-sticky{min-height:0}
+  .demo-card{height:min(440px,calc(100svh - var(--nav-h,68px) - 44px));min-height:340px}
   .demo-card .cap{left:16px;right:16px;bottom:16px;padding:13px}.demo-card .cap h3{font-size:20px}.demo-card .cap p{font-size:12px}
 }
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}.reveal{opacity:1;transform:none}}
@@ -341,6 +336,7 @@ footer{background:#111319;color:#fff;padding:70px 0 34px}.foot-grid{display:grid
     <div class="navlinks">
       <a href="#demo">DEMONSTRAÇÕES</a><a href="#microdetails">DETAILS • MICROKIT • BENCHO</a><a href="#discovery">GETLAYERS • CURATED • 60FPS</a><a href="#references">AWWWARDS • MOBBIN</a><a href="#video">VÍDEO</a><a href="#play">PLAYGROUND</a><a href="#catalogo">CATÁLOGO</a><a href="#receitas">RECEITAS</a><a href="#mcp">MCP</a><a href="#desafio">COMBINAÇÕES</a>
     </div>
+    <button class="nav-more" id="navMore" type="button" aria-label="Ver mais seções" title="Ver mais seções">→</button>
     <div class="top-spacer"></div>
   </div>
 </nav>
@@ -382,8 +378,9 @@ footer{background:#111319;color:#fff;padding:70px 0 34px}.foot-grid{display:grid
     <h2 class="title">A página vira o exemplo.</h2>
     <p class="lead">Esta sequência fica “presa” por alguns instantes enquanto a rolagem vertical move os cartões na horizontal — um padrão clássico de ScrollTrigger, Motion e sites de portfólio cinematográficos.</p>
   </div>
-  <div class="horizontal-pin" id="horizontalPin">
-    <div class="h-track" id="horizontalTrack">
+  <div class="horizontal-shell" id="horizontalShell">
+    <div class="horizontal-sticky" id="horizontalSticky">
+      <div class="h-track" id="horizontalTrack">
     <article class="demo-card">
       <div class="scene zoom-scene"><div class="zoom-orb" id="zoomOrb"></div></div>
       <div class="cap"><div><h3>Motion.dev — scroll zoom</h3><p>Escala ligada ao progresso da rolagem. Ótimo para hero, produto e transições entre capítulos.</p></div><a href="https://motion.dev/examples?category=scroll" target="_blank" rel="noreferrer">abrir exemplos ↗</a></div>
@@ -411,6 +408,7 @@ footer{background:#111319;color:#fff;padding:70px 0 34px}.foot-grid{display:grid
       <div class="scene uiverse-scene"><button class="u-btn">hover me</button><div class="u-loader"></div><div class="u-toggle"></div></div>
       <div class="cap"><div><h3>Uiverse — pequenos detalhes</h3><p>Botões, loaders, toggles, cards e inputs. Excelente para estudar CSS e Tailwind copiando e desmontando o código.</p></div><a href="https://uiverse.io/" target="_blank" rel="noreferrer">explorar ↗</a></div>
     </article>
+      </div>
     </div>
   </div>
 </section>
@@ -946,6 +944,21 @@ function Catalog(){
 }
 
 window.addEventListener('DOMContentLoaded',()=>{
+  // navegação superior responsiva: revela seções escondidas e destaca a seção atual.
+  (()=>{
+    const topbar=document.querySelector('.topbar'),nav=document.querySelector('.navlinks'),more=document.getElementById('navMore');
+    if(!topbar||!nav||!more)return;
+    const links=[...nav.querySelectorAll('a[href^="#"]')];
+    const updateOverflow=()=>{const overflow=nav.scrollWidth>nav.clientWidth+4;topbar.classList.toggle('nav-overflow',overflow);const atEnd=nav.scrollLeft+nav.clientWidth>=nav.scrollWidth-8;more.textContent=atEnd?'←':'→';more.setAttribute('aria-label',atEnd?'Voltar ao início das seções':'Ver mais seções')};
+    more.addEventListener('click',()=>{const atEnd=nav.scrollLeft+nav.clientWidth>=nav.scrollWidth-8;nav.scrollTo({left:atEnd?0:Math.min(nav.scrollLeft+Math.max(260,nav.clientWidth*.72),nav.scrollWidth),behavior:'smooth'});setTimeout(updateOverflow,350)});
+    nav.addEventListener('scroll',()=>requestAnimationFrame(updateOverflow),{passive:true});
+    addEventListener('resize',()=>setTimeout(updateOverflow,80),{passive:true});
+    links.forEach(a=>a.addEventListener('click',()=>{links.forEach(x=>x.classList.remove('active'));a.classList.add('active')}));
+    const sections=links.map(a=>document.querySelector(a.getAttribute('href'))).filter(Boolean);
+    if('IntersectionObserver' in window){const obs=new IntersectionObserver(entries=>{const visible=entries.filter(e=>e.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];if(!visible)return;const a=links.find(x=>x.getAttribute('href')==='#'+visible.target.id);if(a){links.forEach(x=>x.classList.toggle('active',x===a));a.scrollIntoView?.({block:'nearest',inline:'nearest'})}}, {rootMargin:'-18% 0px -62% 0px',threshold:[0,.05,.2,.5]});sections.forEach(x=>obs.observe(x))}
+    updateOverflow();setTimeout(updateOverflow,300);
+  })();
+
   const catSel=document.getElementById('toolCategory'); [...new Set(TOOLS.map(t=>t.cat))].sort().forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;catSel.appendChild(o)});
   const root=document.getElementById('catalogRoot');
   if(window.React && window.ReactDOM){
@@ -1087,6 +1100,51 @@ window.addEventListener('DOMContentLoaded',()=>{
 })
 
 window.addEventListener('load',()=>{
+  // horizontal storytelling sem pin do GSAP: o documento reserva a altura real da animação
+  // e um bloco sticky converte a rolagem vertical em deslocamento horizontal.
+  const hShell=document.getElementById('horizontalShell');
+  const hSticky=document.getElementById('horizontalSticky');
+  const hTrack=document.getElementById('horizontalTrack');
+  const hBlur=document.getElementById('blurDemo');
+  hBlur.innerHTML=hBlur.textContent.split(' ').map(w=>`<span>${w}&nbsp;</span>`).join('');
+
+  let hDistance=0,hTravel=0,hRaf=0;
+  const navHeight=()=>Math.ceil((document.querySelector('.topbar')?.getBoundingClientRect().height||64)+4);
+  const setNavHeight=()=>document.documentElement.style.setProperty('--nav-h',navHeight()+'px');
+  const measureHorizontal=()=>{
+    setNavHeight();
+    if(innerWidth<=640){
+      hShell.style.height='auto';hTrack.style.transform='none';hDistance=0;hTravel=0;
+      [...hBlur.children].forEach(el=>{el.style.opacity='1';el.style.filter='blur(0px)';el.style.transform='none'});
+      return;
+    }
+    hDistance=Math.max(0,hTrack.scrollWidth-document.documentElement.clientWidth+44);
+    hTravel=Math.max(hDistance,innerHeight*.9);
+    const stickyH=Math.max(1,innerHeight-navHeight());
+    hShell.style.height=(stickyH+hTravel)+'px';
+    updateHorizontal();
+  };
+  const updateHorizontal=()=>{
+    hRaf=0;
+    if(innerWidth<=640||!hTravel)return;
+    const rect=hShell.getBoundingClientRect();
+    const start=navHeight();
+    const p=Math.max(0,Math.min(1,(start-rect.top)/hTravel));
+    hTrack.style.transform=`translate3d(${-hDistance*p}px,0,0)`;
+    const orb=document.getElementById('zoomOrb');
+    if(orb){const q=Math.min(1,p/.7);orb.style.transform=`scale(${1+1.7*q}) rotate(${220*q}deg)`}
+    const words=[...hBlur.children];
+    words.forEach((el,i)=>{const local=Math.max(0,Math.min(1,(p*1.35)-(i*Math.min(.065,0.45/Math.max(1,words.length)))));el.style.opacity=String(.15+.85*local);el.style.filter=`blur(${8*(1-local)}px)`;el.style.transform=`translateY(${18*(1-local)}px)`});
+  };
+  const requestHorizontal=()=>{if(!hRaf)hRaf=requestAnimationFrame(updateHorizontal)};
+  addEventListener('scroll',requestHorizontal,{passive:true});
+  addEventListener('resize',()=>{clearTimeout(window.__hResize);window.__hResize=setTimeout(measureHorizontal,80)},{passive:true});
+  if(document.fonts?.ready)document.fonts.ready.then(measureHorizontal);else measureHorizontal();
+  setTimeout(measureHorizontal,250);
+
+  // navegação interna: atualiza medidas após saltos de âncora e evita títulos sob a barra sticky.
+  document.querySelectorAll('.topbar a[href^="#"]').forEach(a=>a.addEventListener('click',()=>setTimeout(()=>{measureHorizontal();window.ScrollTrigger?.refresh?.()},350)));
+
   if(!window.gsap||!window.ScrollTrigger){
     document.body.classList.add('no-gsap');
     const pb=document.getElementById('progressBar');
@@ -1107,27 +1165,7 @@ window.addEventListener('load',()=>{
   gsap.to('#manifestoText .word',{opacity:1,filter:'blur(0px)',y:0,stagger:.045,ease:'none',scrollTrigger:{trigger:'#manifestoText',start:'top 75%',end:'bottom 35%',scrub:.5}})
   // normal reveals
   gsap.utils.toArray('.reveal').forEach(el=>gsap.to(el,{opacity:1,y:0,duration:.8,ease:'power3.out',scrollTrigger:{trigger:el,start:'top 88%',once:true}}))
-  // horizontal storytelling: o cabeçalho rola normalmente e apenas os cartões ficam presos.
-  // Isso evita cortes em notebooks, zoom do navegador e telas com pouca altura útil.
-  const track=document.getElementById('horizontalTrack');
-  const pin=document.getElementById('horizontalPin');
-  const bd=document.getElementById('blurDemo');
-  bd.innerHTML=bd.textContent.split(' ').map(w=>`<span>${w}&nbsp;</span>`).join('');
-  const mm=gsap.matchMedia();
-  mm.add('(min-width: 641px)',()=>{
-    const topOffset=()=>Math.ceil((document.querySelector('.topbar')?.getBoundingClientRect().height||64)+4);
-    const distance=()=>Math.max(0,track.scrollWidth-document.documentElement.clientWidth+44);
-    const start=()=>`top ${topOffset()}px`;
-    gsap.set(track,{x:0});
-    gsap.to(track,{x:()=>-distance(),ease:'none',scrollTrigger:{trigger:pin,start,end:()=>'+='+Math.max(distance(),1),scrub:1,pin:true,pinSpacing:true,anticipatePin:1,invalidateOnRefresh:true}});
-    gsap.to('#zoomOrb',{scale:2.7,rotate:220,ease:'none',scrollTrigger:{trigger:pin,start,end:()=>'+='+Math.max(distance()*.7,1),scrub:1,invalidateOnRefresh:true}});
-    gsap.to('#blurDemo span',{opacity:1,filter:'blur(0px)',y:0,stagger:.09,duration:.6,scrollTrigger:{trigger:pin,start,end:()=>'+='+Math.max(distance()*.7,1),scrub:1,invalidateOnRefresh:true}});
-    return()=>gsap.set(track,{clearProps:'transform'});
-  });
-  mm.add('(max-width: 640px)',()=>{
-    gsap.set(track,{clearProps:'transform'});
-    gsap.set('#blurDemo span',{opacity:1,filter:'blur(0px)',y:0});
-  });
+
 })
 </script>
 
