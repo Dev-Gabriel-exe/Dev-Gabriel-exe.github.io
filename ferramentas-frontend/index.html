@@ -135,6 +135,17 @@ section[id],header[id]{scroll-margin-top:calc(var(--nav-h,68px) + 14px)}
 @media(prefers-reduced-motion:reduce){.unlumen-item{transform:none!important}}
 
 
+
+/* Thinking Gods-inspired Mesh Flow — recriação didática em Canvas 2D */
+.thinking-scene{background:#0d0f12!important;color:#fff;overflow:hidden}
+.thinking-scene canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.thinking-overlay{position:absolute;inset:0;pointer-events:none;display:flex;align-items:flex-start;justify-content:space-between;padding:24px 26px;z-index:2}
+.thinking-mark{font:900 10px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:#d8d8d3;border:1px solid #ffffff28;background:#0c0e12aa;backdrop-filter:blur(10px);border-radius:999px;padding:8px 10px}
+.thinking-coords{font:700 10px var(--mono);letter-spacing:.08em;color:#8d939c;text-align:right}
+.thinking-signal{position:absolute;left:50%;top:45%;width:8px;height:8px;border-radius:50%;background:#f6f3e9;box-shadow:0 0 0 8px #ffffff12,0 0 40px #ffffff66;transform:translate(-50%,-50%);opacity:.9;pointer-events:none;transition:opacity .2s}
+@media(max-width:700px){.thinking-overlay{padding:18px}.thinking-coords{display:none}}
+@media(prefers-reduced-motion:reduce){.thinking-signal{display:none}}
+
 /* Details Vault + MicroKit + Bencho lab */
 .microdetails{background:#fff}
 .microdetails-head{display:grid;grid-template-columns:1.2fr .8fr;gap:30px;align-items:end;margin-bottom:34px}
@@ -443,6 +454,17 @@ footer{background:#111319;color:#fff;padding:70px 0 34px}.foot-grid{display:grid
         </div>
       </div>
       <div class="cap"><div><h3>Unlumen UI — Dock com spring</h3><p>Recriação didática do padrão: o item mais próximo cresce e os vizinhos acompanham suavemente. O componente real é React/shadcn e fica editável no projeto.</p></div><a href="https://ui.unlumen.com/components/dock" target="_blank" rel="noreferrer">abrir Dock ↗</a></div>
+    </article>
+    <article class="demo-card" id="thinkingGodsDemoCard">
+      <div class="scene thinking-scene" id="thinkingMeshScene">
+        <canvas id="thinkingMeshCanvas" aria-label="Demonstração Mesh Flow em Canvas 2D que deforma a grade conforme o cursor"></canvas>
+        <div class="thinking-overlay" aria-hidden="true">
+          <span class="thinking-mark">Thinking Gods • Mesh Flow</span>
+          <span class="thinking-coords" id="thinkingCoords">CANVAS 2D<br>MOVE O CURSOR</span>
+        </div>
+        <span class="thinking-signal" id="thinkingSignal" aria-hidden="true"></span>
+      </div>
+      <div class="cap"><div><h3>Thinking Gods — Mesh Flow</h3><p>Recriação didática do efeito: uma malha quase invisível é puxada pelo cursor como uma superfície elástica. Canvas 2D, sem shader e sem biblioteca externa.</p></div><a href="https://thinkingods.com/prompts" target="_blank" rel="noreferrer">abrir biblioteca ↗</a></div>
     </article>
       </div>
     </div>
@@ -888,7 +910,7 @@ io.observe(document.querySelector('#hero3d'))</pre><div class="why">Quando usar:
   <div class="wrap">
     <div class="foot-grid">
       <div><h2>Use biblioteca como vocabulário, não como muleta.</h2><p>O objetivo deste catálogo é ajudar a escolher uma intenção visual, encontrar recursos, testar, adaptar e entender por que cada efeito existe.</p></div>
-      <div><p><strong>Verificação de gratuidade:</strong> condições conferidas em 01/10/2026 e podem mudar. O catálogo evita afirmar “grátis” quando só existe preview ou plano pago.</p><div class="foot-links"><a href="https://motion.dev/" target="_blank" rel="noreferrer">Motion</a><a href="https://reactbits.dev/" target="_blank" rel="noreferrer">React Bits</a><a href="https://uiverse.io/" target="_blank" rel="noreferrer">Uiverse</a><a href="https://haikei.app/" target="_blank" rel="noreferrer">Haikei</a><a href="https://gsap.com/" target="_blank" rel="noreferrer">GSAP</a><a href="https://threejs.org/" target="_blank" rel="noreferrer">Three.js</a><a href="https://magicui.design/" target="_blank" rel="noreferrer">Magic UI</a><a href="https://www.getlayers.ai/" target="_blank" rel="noreferrer">GetLayers</a><a href="https://curated.design/" target="_blank" rel="noreferrer">Curated</a><a href="https://60fps.design/" target="_blank" rel="noreferrer">60fps</a><a href="https://www.awwwards.com/" target="_blank" rel="noreferrer">Awwwards</a><a href="https://land-book.com/" target="_blank" rel="noreferrer">Land-book</a><a href="https://www.siteinspire.com/" target="_blank" rel="noreferrer">SiteInspire</a><a href="https://mobbin.com/" target="_blank" rel="noreferrer">Mobbin</a></div></div>
+      <div><p><strong>Verificação de gratuidade:</strong> condições conferidas em 01/10/2026 e podem mudar. O catálogo evita afirmar “grátis” quando só existe preview ou plano pago.</p><div class="foot-links"><a href="https://motion.dev/" target="_blank" rel="noreferrer">Motion</a><a href="https://reactbits.dev/" target="_blank" rel="noreferrer">React Bits</a><a href="https://uiverse.io/" target="_blank" rel="noreferrer">Uiverse</a><a href="https://haikei.app/" target="_blank" rel="noreferrer">Haikei</a><a href="https://gsap.com/" target="_blank" rel="noreferrer">GSAP</a><a href="https://threejs.org/" target="_blank" rel="noreferrer">Three.js</a><a href="https://magicui.design/" target="_blank" rel="noreferrer">Magic UI</a><a href="https://www.getlayers.ai/" target="_blank" rel="noreferrer">GetLayers</a><a href="https://curated.design/" target="_blank" rel="noreferrer">Curated</a><a href="https://60fps.design/" target="_blank" rel="noreferrer">60fps</a><a href="https://www.awwwards.com/" target="_blank" rel="noreferrer">Awwwards</a><a href="https://land-book.com/" target="_blank" rel="noreferrer">Land-book</a><a href="https://www.siteinspire.com/" target="_blank" rel="noreferrer">SiteInspire</a><a href="https://mobbin.com/" target="_blank" rel="noreferrer">Mobbin</a><a href="https://thinkingods.com/prompts" target="_blank" rel="noreferrer">Thinking Gods</a></div></div>
     </div>
     <div class="author-card">
       <div>
@@ -910,6 +932,7 @@ const TOOLS = [
  {name:'GSAP + ScrollTrigger',url:'https://gsap.com/docs/v3/Plugins/ScrollTrigger/',cat:'Motion / scroll',status:'free',badge:'biblioteca',what:'Controle preciso de timelines, SVG, texto e rolagem. ScrollTrigger liga animações ao scroll com trigger, scrub, pin e snap.',free:'Uso da biblioteca e plugins está amplamente disponível; revise a licença para cenários de redistribuição específicos.',when:'Sites cinematográficos, storytelling por rolagem, pinning e sequências sincronizadas.',use:'Crie uma timeline curta; conecte ao ScrollTrigger; teste em mobile e reduced-motion.',vibe:'cinematic • pin • scrub'},
  {name:'React Bits',url:'https://reactbits.dev/',cat:'Componentes animados',status:'free',badge:'200+ efeitos',what:'Coleção de componentes React animados e customizáveis: texto, backgrounds, UI, cursores, 3D e microinterações.',free:'Gratuito para uso pessoal/comercial com MIT + Commons Clause; não revenda a biblioteca como biblioteca.',when:'Landing pages e portfólios que precisam de personalidade rapidamente.',use:'Copie um componente, reduza props e cores, depois adapte ao design system do projeto.',vibe:'blur text • split text • backgrounds'},
  {name:'Unlumen UI',url:'https://ui.unlumen.com/components',cat:'Componentes animados',status:'freemium',badge:'React + shadcn',what:'Coleção de componentes e primitives React/shadcn com motion refinado: Dock, Cursor Image Trail, Tilt Card, Motion Navigation, backgrounds e outros padrões.',free:'Há uma seleção relevante marcada como Free, incluindo Dock, Cursor Image Trail, Tilt Card, Motion FAQ e outros; componentes Pro ficam nos planos pagos.',when:'Quando o projeto já usa React/shadcn e você quer microinterações polidas sem transformar a página em uma coleção de efeitos.',use:'Abra um componente Free, instale pelo registry do shadcn e ajuste cores, intensidade do spring, distância e conteúdo para o seu design system.',vibe:'dock • spring • cursor trail • shadcn'},
+ {name:'Thinking Gods',url:'https://thinkingods.com/prompts',cat:'Prompts + motion',status:'free',badge:'Canvas 2D + prompts',what:'Biblioteca de prompts, tutoriais e componentes interativos voltados a sites que se movem. Reúne ideias com Canvas 2D, Three.js, GSAP, WebGL, React, vídeo e fluxos com IA.',free:'A biblioteca de prompts está liberada para copiar; a página também apresenta componentes gratuitos e descreve uso pessoal e em projetos de clientes. As condições podem mudar.',when:'Quando você quer aprender o mecanismo visual e gerar uma primeira implementação com IA, em vez de apenas copiar um componente pronto.',use:'Escolha um efeito, copie o prompt completo, gere um arquivo autocontido em uma IA de código e depois adapte geometria, intensidade, tipografia e acessibilidade ao seu projeto.',vibe:'mesh flow • canvas • prompt-to-code • interactive hero'},
  {name:'Details Vault',url:'https://www.details.so/',cat:'Referências / prompts',status:'freemium',badge:'inspo + vault',what:'Biblioteca curada de detalhes de sites reais e um Vault de transições, botões e seções com implementação pronta. Também oferece MCP para levar as referências ao agente de IA.',free:'Starter permite explorar referências recentes, previews do Vault e recursos gratuitos selecionados. O Vault completo, código e MCP avançado ficam nos planos pagos.',when:'Quando você não quer começar por uma biblioteca genérica: primeiro encontre uma direção visual e um detalhe de interação que realmente combine com o projeto.',use:'Pesquise pelo detalhe específico — hero, preloader, pinned scroll, cursor, page transition — e adapte a ideia em vez de copiar a identidade do site original.',vibe:'inspo • transitions • thinking orbs'},
  {name:'MicroKit UI',url:'https://microkit.co/',cat:'Componentes animados',status:'free',badge:'49 interações MIT',what:'Biblioteca de microinterações copy-paste para React, CSS e Tailwind: cursor glow, magnetic fill, text swap, tabs, hover toolbar e scrub number field.',free:'Open source sob MIT. O catálogo atual reúne 49 interações; muitas não exigem dependência além do próprio código.',when:'Quando o site já está funcional, mas botões, inputs e navegação ainda parecem “sem vida”.',use:'Pegue uma microinteração por vez e aplique em um componente importante; depois teste teclado, touch e reduced-motion.',vibe:'cursor glow • scrub • text swap'},
  {name:'Bencho',url:'https://bencho.dev/',cat:'Componentes animados',status:'free',badge:'47 blocos MIT',what:'Bancada de blocos interativos reais: você pressiona, arrasta, desliza, seleciona e ajusta parâmetros antes de copiar o código.',free:'Todos os blocos/código entregues pelo Bencho são MIT e podem ser usados comercialmente; a marca e o site em si não são parte da licença.',when:'Para ensinar interfaces táteis: slide-to-confirm, dynamic island, time scrubber, image compare, drag, radial menu e outros padrões que dependem de gesto.',use:'Teste o bloco no próprio site, entenda qual gesto ele resolve e só então leve o padrão ao projeto.',vibe:'drag • press • morph • tactile'},
@@ -1163,6 +1186,89 @@ window.addEventListener('DOMContentLoaded',()=>{
       item.addEventListener('focus',()=>{active=true;const r=item.getBoundingClientRect();targets(r.left+r.width/2);ensure()});
       item.addEventListener('blur',()=>{active=false;reset();ensure()});
     });
+  })();
+
+
+  // Thinking Gods-inspired Mesh Flow — grade elástica em Canvas 2D
+  (()=>{
+    const canvas=document.getElementById('thinkingMeshCanvas');
+    const scene=document.getElementById('thinkingMeshScene');
+    if(!canvas||!scene)return;
+    const ctx=canvas.getContext('2d');
+    const signal=document.getElementById('thinkingSignal');
+    const coords=document.getElementById('thinkingCoords');
+    const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let w=1,h=1,dpr=1,raf=0,visible=true;
+    const pointer={x:.5,y:.45,tx:.5,ty:.45,active:false};
+
+    const fit=()=>{
+      const r=scene.getBoundingClientRect();
+      dpr=Math.min(devicePixelRatio||1,2);
+      w=Math.max(1,r.width);h=Math.max(1,r.height);
+      canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);
+      canvas.style.width=w+'px';canvas.style.height=h+'px';
+      ctx.setTransform(dpr,0,0,dpr,0,0);
+    };
+    const displaced=(x,y)=>{
+      const px=pointer.x*w,py=pointer.y*h;
+      const dx=px-x,dy=py-y;
+      const dist2=dx*dx+dy*dy;
+      const sigma=Math.max(105,Math.min(w,h)*.34);
+      const g=Math.exp(-dist2/(2*sigma*sigma));
+      const pull=(reduced?0:.72)*g;
+      return [x+dx*pull,y+dy*pull,g];
+    };
+    const draw=()=>{
+      ctx.clearRect(0,0,w,h);
+      ctx.fillStyle='#0d0f12';ctx.fillRect(0,0,w,h);
+      const gap=Math.max(26,Math.min(38,w/18));
+      const cols=Math.ceil(w/gap)+2,rows=Math.ceil(h/gap)+2;
+      const ox=(w-(cols-1)*gap)/2,oy=(h-(rows-1)*gap)/2;
+      const pts=Array.from({length:rows},()=>Array(cols));
+      for(let r=0;r<rows;r++)for(let c=0;c<cols;c++)pts[r][c]=displaced(ox+c*gap,oy+r*gap);
+
+      ctx.lineWidth=1;
+      for(let r=0;r<rows;r++){
+        ctx.beginPath();
+        for(let c=0;c<cols;c++){const [x,y,g]=pts[r][c];ctx.strokeStyle='rgba(228,231,235,.15)';c?ctx.lineTo(x,y):ctx.moveTo(x,y)}
+        ctx.strokeStyle='rgba(228,231,235,.13)';ctx.stroke();
+      }
+      for(let c=0;c<cols;c++){
+        ctx.beginPath();
+        for(let r=0;r<rows;r++){const [x,y]=pts[r][c];r?ctx.lineTo(x,y):ctx.moveTo(x,y)}
+        ctx.strokeStyle='rgba(228,231,235,.13)';ctx.stroke();
+      }
+      for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
+        const [x,y,g]=pts[r][c];
+        ctx.beginPath();ctx.arc(x,y,1.15+2.2*g,0,Math.PI*2);
+        ctx.fillStyle=`rgba(245,244,238,${.18+.7*g})`;ctx.fill();
+      }
+      const px=pointer.x*w,py=pointer.y*h;
+      const glow=ctx.createRadialGradient(px,py,0,px,py,Math.max(90,Math.min(w,h)*.28));
+      glow.addColorStop(0,'rgba(255,255,255,.11)');glow.addColorStop(1,'rgba(255,255,255,0)');
+      ctx.fillStyle=glow;ctx.fillRect(0,0,w,h);
+    };
+    const frame=()=>{
+      raf=0;if(!visible)return;
+      pointer.x+=(pointer.tx-pointer.x)*(reduced?1:.12);
+      pointer.y+=(pointer.ty-pointer.y)*(reduced?1:.12);
+      draw();
+      if(!reduced&&(pointer.active||Math.abs(pointer.tx-pointer.x)>.001||Math.abs(pointer.ty-pointer.y)>.001))raf=requestAnimationFrame(frame);
+    };
+    const request=()=>{if(!raf)raf=requestAnimationFrame(frame)};
+    const move=e=>{
+      const r=scene.getBoundingClientRect();
+      pointer.tx=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width));
+      pointer.ty=Math.max(0,Math.min(1,(e.clientY-r.top)/r.height));pointer.active=true;
+      if(signal){signal.style.left=(pointer.tx*100)+'%';signal.style.top=(pointer.ty*100)+'%';signal.style.opacity='1'}
+      if(coords)coords.innerHTML=`CANVAS 2D<br>X ${Math.round(pointer.tx*100)} · Y ${Math.round(pointer.ty*100)}`;request();
+    };
+    scene.addEventListener('pointermove',move);
+    scene.addEventListener('pointerenter',e=>{pointer.active=true;move(e)});
+    scene.addEventListener('pointerleave',()=>{pointer.active=false;pointer.tx=.5;pointer.ty=.45;if(signal){signal.style.left='50%';signal.style.top='45%';signal.style.opacity='.7'}if(coords)coords.innerHTML='CANVAS 2D<br>MOVE O CURSOR';request()});
+    const ro=new ResizeObserver(()=>{fit();request()});ro.observe(scene);
+    const io=new IntersectionObserver(([entry])=>{visible=entry.isIntersecting;if(visible)request()},{threshold:.03});io.observe(scene);
+    fit();draw();
   })();
 
   // spotlight
