@@ -92,7 +92,7 @@ function audioDownload(a){
 }
 function assetIcon(a){return ({personagem:'🎮',mapa:'🗺️',item:'🗝️',modelo:'🧊',som:'🔊'})[a.cat]}
 function renderAssets(){
- const cat=document.querySelector('[data-active-filter]')?.dataset.activeFilter||'todos';
+ const cat=document.querySelector('[data-filter].active')?.dataset.filter||'todos';
  const search=(document.getElementById('assetSearch')?.value||'').toLowerCase();
  const filtered=assets.filter(a=>(cat==='todos'||a.cat===cat) && (a.name.toLowerCase().includes(search)||a.desc.toLowerCase().includes(search)));
  const box=document.getElementById('assetGrid');if(!box)return;
@@ -104,7 +104,7 @@ function renderAssets(){
  box.querySelectorAll('[data-asset]').forEach(b=>b.addEventListener('click',async function(){const a=assets.find(x=>x.id===b.dataset.asset);b.disabled=true;const old=b.textContent;b.textContent='Preparando arquivo…';try{if(a.cat==='modelo')modelDownload(a);else if(a.cat==='som')audioDownload(a);else await pngDownload(a);}catch(e){alert('Não foi possível baixar. Tente Chrome/Edge atualizado. '+e.message)}finally{b.disabled=false;b.textContent=old}}));
  const n=document.getElementById('resultCount');if(n)n.textContent=filtered.length+' recursos nesta seleção';
 }
-document.querySelectorAll('[data-filter]').forEach(b=>b.addEventListener('click',function(){document.querySelectorAll('[data-filter]').forEach(x=>{x.dataset.activeFilter='';x.classList.remove('active')});b.dataset.activeFilter=b.dataset.filter;b.classList.add('active');renderAssets();}));
+document.querySelectorAll('[data-filter]').forEach(b=>b.addEventListener('click',function(){document.querySelectorAll('[data-filter]').forEach(x=>{x.classList.remove('active')});b.classList.add('active');renderAssets();}));
 document.getElementById('assetSearch')?.addEventListener('input',renderAssets);
 function refreshStatus(){try{const x=JSON.parse(localStorage.getItem('pit_creator_mode_v08')||'{}');let done=Array.isArray(x.done)?x.done:[];const meter=document.getElementById('myProgress');if(meter)meter.textContent=done.length+'/6 missões • '+done.reduce((s,n)=>s+[100,120,150,150,200,280][n-1],0)+' XP';}catch(e){}}
 renderAssets();refreshStatus();window.addEventListener('pageshow',refreshStatus);
