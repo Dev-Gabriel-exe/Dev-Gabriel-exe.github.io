@@ -1,0 +1,75 @@
+name: Build e teste real do coletor EXE uCode
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'inventario-ucode/coletor-exe/**'
+      - '.github/workflows/ucode-build-exe.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build-and-test:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Compilar aplicativo Windows portatil
+        shell: pwsh
+        run: |
+          dotnet publish .\inventario-ucode\coletor-exe\Collector.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:EnableCompressionInSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o "$env:RUNNER_TEMP\ucode-publish"
+          if ($LASTEXITCODE -ne 0) { throw "Falha na compilacao." }
+          $exe = Join-Path $env:RUNNER_TEMP 'ucode-publish\uCode-Coletor.exe'
+          if (-not (Test-Path $exe)) { throw "EXE nao foi criado." }
+          Write-Host "EXE tamanho (MB):" ([math]::Round((Get-Item $exe).Length / 1MB, 2))
+      - name: Executar EXE real e ler JSON salvo
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $exe = Join-Path $env:RUNNER_TEMP 'ucode-publish\uCode-Coletor.exe'
+          $resultFile = Join-Path ([IO.Path]::GetTempPath()) 'ucode_coletor_test_result.txt'
+          $errorFile = Join-Path ([IO.Path]::GetTempPath()) 'ucode_coletor_test_error.txt'
+          Remove-Item $resultFile, $errorFile -ErrorAction SilentlyContinue
+          $process = Start-Process -FilePath $exe -ArgumentList '--test' -Wait -PassThru
+          if ($process.ExitCode -ne 0) {
+             if (Test-Path $errorFile) { Get-Content $errorFile }
+             throw "EXE retornou erro $($process.ExitCode)"
+          }
+          if (-not (Test-Path $resultFile)) { throw "EXE nao informou onde salvou o JSON." }
+          $path = (Get-Content $resultFile -Raw).Trim()
+          if (-not (Test-Path -LiteralPath $path -PathType Leaf)) { throw "JSON nao existe em $path" }
+          $data = Get-Content -LiteralPath $path -Raw -Encoding UTF8 | ConvertFrom-Json
+          if (-not $data.hostname -or -not $data.collector -or -not $data.cpu -or -not $data.os -or -not $data.disks) {
+             throw "JSON invalido ou dados basicos ausentes."
+          }
+          Write-Host "PASS: EXE criou JSON valido:" $path
+          Write-Host "Hostname:" $data.hostname
+          Write-Host "CPU:" $data.cpu
+          Write-Host "Discos:" $data.disks.Count
+          Write-Host "Tamanho JSON:" (Get-Item $path).Length
+      - name: Disponibilizar executavel como artefato de teste
+        uses: actions/upload-artifact@v4
+        with:
+          name: uCode-Coletor-Windows-x64
+          path: ${{ runner.temp }}\ucode-publish\uCode-Coletor.exe
+          retention-days: 30
+          if-no-files-found: error
+      - name: Publicar executavel testado no GitHub Pages
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $source = Join-Path $env:RUNNER_TEMP 'ucode-publish\uCode-Coletor.exe'
+          $destination = Join-Path $env:GITHUB_WORKSPACE 'inventario-ucode\downloads\uCode-Coletor.exe'
+          New-Item -ItemType Directory -Force -Path (Split-Path $destination) | Out-Null
+          Copy-Item -LiteralPath $source -Destination $destination -Force
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add inventario-ucode/downloads/uCode-Coletor.exe
+          git diff --staged --quiet
+          if ($LASTEXITCODE -eq 0) { Write-Host 'Mesmo binario ja publicado.'; exit 0 }
+          git commit -m "Publica coletor EXE apos compilacao e teste Windows reais"
+          if ($LASTEXITCODE -ne 0) { throw "Falha no commit do EXE." }
+          git push origin HEAD:main
+          if ($LASTEXITCODE -ne 0) { throw "Falha no push; o EXE permanece disponivel no artefato de teste." }
