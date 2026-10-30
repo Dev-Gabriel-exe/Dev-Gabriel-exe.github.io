@@ -112,8 +112,81 @@ $obj=[ordered]@{
  adapters=$adapters
  software=$apps
 }
-$json=$obj|ConvertTo-Json -Depth 8
-$file=Join-Path ([Environment]::GetFolderPath('Desktop')) ('ucode_inventario_'+($env:COMPUTERNAME -replace '[^a-zA-Z0-9_-]','_')+'.json')
-try{$json|Out-File -FilePath $file -Encoding utf8;Write-Host 'JSON gerado na area de trabalho:' $file -ForegroundColor Green}catch{Write-Host 'Nao foi possivel salvar automaticamente.'}
-try{Set-Clipboard -Value $json;Write-Host 'JSON copiado para a area de transferencia.' -ForegroundColor Green}catch{}
-Write-Host 'Importe o arquivo no portal uCode e confira as informacoes antes de salvar.'
+# Conversao verificada: em caso de falha, mostrar o motivo.
+try {
+ $json=$obj | ConvertTo-Json -Depth 8 -ErrorAction Stop
+ if([string]::IsNullOrWhiteSpace($json)){ throw "O JSON gerado ficou vazio." }
+} catch {
+ Write-Host "[ERRO] Nao foi possivel gerar o JSON: $($_.Exception.Message)" -ForegroundColor Red
+ Write-Host "Copie ou fotografe este erro para suporte uCode." -ForegroundColor Yellow
+ return
+}
+
+# Resolucao de pastas: a area de trabalho pode estar redirecionada ao OneDrive.
+$name=($env:COMPUTERNAME -replace '[^a-zA-Z0-9_-]','_')
+$stamp=Get-Date -Format 'yyyyMMdd_HHmmss'
+$filename='ucode_inventario_'+$name+'_'+$stamp+'.json'
+$folders=New-Object 'System.Collections.Generic.List[string]'
+function Add-SaveFolder([string]$candidate){
+ if([string]::IsNullOrWhiteSpace($candidate)){return}
+ try {
+  if((Test-Path -LiteralPath $candidate -PathType Container) -and -not $folders.Contains($candidate)){
+   $folders.Add($candidate)
+  }
+ } catch {}
+}
+Add-SaveFolder ([Environment]::GetFolderPath('Desktop'))
+if($env:USERPROFILE){
+ Add-SaveFolder (Join-Path $env:USERPROFILE 'Desktop')
+ Add-SaveFolder (Join-Path $env:USERPROFILE 'Downloads')
+ Add-SaveFolder (Join-Path $env:USERPROFILE 'Documents')
+}
+if($env:OneDrive){Add-SaveFolder (Join-Path $env:OneDrive 'Desktop')}
+if($env:OneDriveCommercial){Add-SaveFolder (Join-Path $env:OneDriveCommercial 'Desktop')}
+Add-SaveFolder ([Environment]::GetFolderPath('MyDocuments'))
+if($env:TEMP){Add-SaveFolder $env:TEMP}
+
+$savedPath=$null
+$writeErrors=New-Object 'System.Collections.Generic.List[string]'
+foreach($folder in $folders){
+ $destination=Join-Path $folder $filename
+ try {
+  $json | Out-File -LiteralPath $destination -Encoding UTF8 -ErrorAction Stop
+  if(-not (Test-Path -LiteralPath $destination -PathType Leaf)){
+   throw 'O arquivo nao apareceu depois da gravacao.'
+  }
+  $info=Get-Item -LiteralPath $destination -ErrorAction Stop
+  if($info.Length -lt 10){ throw 'O arquivo salvo esta vazio ou incompleto.' }
+  $savedPath=$info.FullName
+  break
+ } catch {
+  $writeErrors.Add("$folder - $($_.Exception.Message)")
+ }
+}
+Write-Host ''
+if($savedPath){
+ Write-Host '[OK] INVENTARIO GERADO E VERIFICADO' -ForegroundColor Green
+ Write-Host ("Arquivo: "+$savedPath) -ForegroundColor Green
+ Write-Host ('Tamanho: '+(Get-Item -LiteralPath $savedPath).Length+' bytes') -ForegroundColor Green
+ Write-Host 'A pasta do arquivo sera aberta no Explorador do Windows.' -ForegroundColor Cyan
+ try {
+  Start-Process -FilePath explorer.exe -ArgumentList ('/select,"'+$savedPath+'"') -ErrorAction Stop
+ } catch {
+  Write-Host 'Abra manualmente o caminho acima pelo Explorador de Arquivos.' -ForegroundColor Yellow
+ }
+} else {
+ Write-Host '[ERRO] Nao foi possivel salvar o JSON em nenhuma pasta disponivel.' -ForegroundColor Red
+ foreach($reason in $writeErrors){Write-Host (" - "+$reason) -ForegroundColor Yellow}
+}
+try {
+ Set-Clipboard -Value $json -ErrorAction Stop
+ Write-Host '[OK] JSON copiado: no inventario, abra Windows / PowerShell e cole no campo JSON (Ctrl+V).' -ForegroundColor Green
+} catch {
+ Write-Host 'Nao foi possivel copiar para a area de transferencia.' -ForegroundColor Yellow
+}
+if($savedPath){
+ Write-Host 'No site uCode, importe o arquivo JSON indicado acima e confira os dados.' -ForegroundColor Cyan
+} else {
+ Write-Host 'Se o JSON foi copiado, cole direto no site sem precisar do arquivo.' -ForegroundColor Cyan
+}
+Write-Host 'Coleta finalizada. Se houve erro, fotografe as mensagens acima.'
