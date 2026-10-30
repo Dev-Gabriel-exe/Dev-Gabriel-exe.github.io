@@ -23,3 +23,20 @@ jobs:
           $record = Get-Content -LiteralPath $matches[0].FullName -Raw | ConvertFrom-Json
           if (-not $record.hostname) { throw "FALHA: JSON sem hostname." }
           Write-Host "PASS: JSON salvo em" $matches[0].FullName
+
+  windows-pwsh:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Executar script no PowerShell 7
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          Write-Host "PowerShell:" $PSVersionTable.PSVersion
+          & .\inventario-ucode\coleta.ps1
+          $places = @([Environment]::GetFolderPath("Desktop"), $env:TEMP)
+          $files = @($places | Where-Object { $_ -and (Test-Path $_) } | ForEach-Object { Get-ChildItem -Path $_ -Filter "ucode_inventario_*.json" -File -ErrorAction SilentlyContinue })
+          if ($files.Count -eq 0) { throw "FALHA: arquivo JSON nao foi gerado." }
+          $record = Get-Content -LiteralPath $files[0].FullName -Raw | ConvertFrom-Json
+          if (-not $record.hostname -or -not $record.collector) { throw "FALHA: JSON invalido." }
+          Write-Host "PASS: JSON criado em" $files[0].FullName
