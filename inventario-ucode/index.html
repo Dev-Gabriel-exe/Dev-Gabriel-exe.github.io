@@ -31,7 +31,7 @@ const uniqueFieldKeys=new Set(["label","serial","hostname","patrimony","ip","mac
 const fieldMap=new Map(defs.flatMap(group=>group[1].map(f=>[f[0],f])));
 function field(f){
  const [key,label,type,values]=f,opts=(values||"").split(","),learn=!uniqueFieldKeys.has(key);
- if(key==="gpuMemoryValue")return '<div class="learning-field"><label for="f_gpuMemoryValue">'+esc(label)+'</label><div class="learning-row"><input id="f_gpuMemoryValue" name="gpuMemoryValue" type="number" step="any" min="0" inputmode="decimal" placeholder="Ex.: 512 ou 4" style="flex:1;min-width:0"><select id="f_gpuMemoryUnit" name="gpuMemoryUnit" aria-label="Unidade da memória de vídeo" style="width:85px;flex:0 0 85px"><option value="GB">GB</option><option value="MB">MB</option></select></div><p class="field-note">Digite o valor como aparece no Windows e selecione MB ou GB. Não precisa converter.</p></div>';
+ if(key==="gpuMemoryValue")return '<div class="learning-field"><label for="f_gpuMemoryValue">'+esc(label)+'</label><div class="learning-row"><input id="f_gpuMemoryValue" name="gpuMemoryValue" type="number" step="any" min="0" inputmode="decimal" placeholder="Ex.: 512 ou 4" style="flex:1;min-width:0"><select id="f_gpuMemoryUnit" name="gpuMemoryUnit" aria-label="Unidade da memória de vídeo" style="width:78px;flex:0 0 78px"><option value="GB">GB</option><option value="MB">MB</option></select><button type="button" class="suggest-toggle" data-suggest-toggle="gpuMemoryValue" aria-label="Memórias anteriores" aria-expanded="false">▾</button></div><div class="suggest-list hide" id="suggest_gpuMemoryValue" role="listbox"></div><p class="field-note">Digite o valor como aparece no Windows e selecione MB ou GB. A seta mostra valores anteriores com suas unidades.</p></div>';
  const input=type==="textarea"
  ?'<textarea name="'+esc(key)+'" id="f_'+esc(key)+'" autocomplete="off"></textarea>'
  :'<input id="f_'+esc(key)+'" name="'+esc(key)+'" type="'+(type==="number"?"number":"text")+'" '+(type==="number"?'step="any" min="0" inputmode="decimal"':'')+' '+(["kind","label"].includes(key)?"required":"")+' value="'+(type==="select"?esc(opts[0]||""):"")+'" autocomplete="off">';
@@ -40,17 +40,17 @@ function field(f){
 function previousValues(key,search=""){
  const f=fieldMap.get(key),base=f&&f[2]==="select"?(f[3]||"").split(","):[];
  const candidates=new Map();
- const add=(value,saved)=>{
+ const add=(value,saved,unit="")=>{
   if(value===undefined||value===null||typeof value==="object")return;
   const v=String(value).trim();if(!v||v.length>6000)return;
-  const normal=v.toLocaleLowerCase("pt-BR"),found=candidates.get(normal);
+  const normal=v.toLocaleLowerCase("pt-BR")+(key==="gpuMemoryValue"?"|"+unit:""),found=candidates.get(normal);
   if(found){if(saved)found.count++;return}
-  candidates.set(normal,{value:v,count:saved?1:0,base:!saved});
+  candidates.set(normal,{value:v,count:saved?1:0,base:!saved,unit});
  };
  for(const a of state.assets){
   if(state.draft&&a.id===state.draft.id)continue;
-  const data=key==="kind"?a.kind:a.data?.[key];
-  add(data,true);
+  const data=key==="kind"?a.kind:key==="gpuMemoryValue"?(a.data?.gpuMemoryValue??a.data?.gpuMemoryGB):a.data?.[key];
+  add(data,true,key==="gpuMemoryValue"?(a.data?.gpuMemoryUnit||"GB"):"");
  }
  base.forEach(v=>add(v,false));
  const filter=search.trim().toLocaleLowerCase("pt-BR");
@@ -70,9 +70,9 @@ function showSuggestions(key,search=""){
  for(const item of entries){
   const b=document.createElement("button");b.type="button";b.className="suggest-option";
   const label=item.value.length>150?item.value.slice(0,147)+"…":item.value;
-  b.textContent=label+(item.count>1?"  ·  "+item.count+" máquinas":"");
+  b.textContent=label+(key==="gpuMemoryValue"?" "+item.unit:"")+(item.count>1?"  ·  "+item.count+" máquinas":"");
   b.title=item.value;
-  b.addEventListener("click",()=>{const input=$("f_"+key);if(!input)return;input.value=item.value;input.dispatchEvent(new Event("input",{bubbles:true}));hideSuggestions();input.focus()});
+  b.addEventListener("click",()=>{const input=$("f_"+key);if(!input)return;input.value=item.value;if(key==="gpuMemoryValue")$("f_gpuMemoryUnit").value=item.unit||"GB";input.dispatchEvent(new Event("input",{bubbles:true}));hideSuggestions();input.focus()});
   list.append(b)
  }
  list.classList.remove("hide");toggle.setAttribute("aria-expanded","true")
