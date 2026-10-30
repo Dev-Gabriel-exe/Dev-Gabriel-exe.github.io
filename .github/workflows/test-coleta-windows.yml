@@ -1,0 +1,34 @@
+name: Testar coleta PowerShell em Windows real
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'inventario-ucode/coleta.ps1'
+      - '.github/workflows/test-coleta-windows.yml'
+  workflow_dispatch:
+jobs:
+  test-windows:
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shell: [powershell, pwsh]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Executar coleta e comprovar JSON persistido
+        shell: ${{ matrix.shell }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Write-Host 'Ambiente:' $PSVersionTable.PSVersion.ToString()
+          Write-Host 'Desktop resolvida:' ([Environment]::GetFolderPath('Desktop'))
+          & .\inventario-ucode\coleta.ps1
+          $root = @([Environment]::GetFolderPath('Desktop'), (Join-Path $env:USERPROFILE 'Downloads'), (Join-Path $env:USERPROFILE 'Documents'), $env:TEMP)
+          $files = @($root | Where-Object { $_ -and (Test-Path -LiteralPath $_) } | ForEach-Object { Get-ChildItem -LiteralPath $_ -Filter "ucode_inventario_*.json" -File -ErrorAction SilentlyContinue } | Sort-Object LastWriteTime -Descending)
+          if ($files.Count -eq 0) { throw "FALHA REAL: nenhum JSON foi criado nas pastas de saída." }
+          $path = $files[0].FullName
+          $json = Get-Content -LiteralPath $path -Raw -Encoding UTF8 | ConvertFrom-Json -ErrorAction Stop
+          if (-not $json.collector -or -not $json.hostname -or -not $json.os) { throw "JSON incompleto: faltam collector, hostname ou os." }
+          Write-Host "TESTE OK: $path"
+          Write-Host "Bytes:" $files[0].Length
+          Write-Host "Collector:" $json.collector
+          Write-Host "Windows:" $json.os
