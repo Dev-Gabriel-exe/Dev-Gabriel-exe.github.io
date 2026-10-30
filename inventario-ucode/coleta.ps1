@@ -6,6 +6,38 @@ $pc=S { Get-CimInstance Win32_ComputerSystem }
 $os=S { Get-CimInstance Win32_OperatingSystem }
 $bios=S { Get-CimInstance Win32_BIOS }
 $processor=S { Get-CimInstance Win32_Processor | Select-Object -First 1 }
+# GPUs: Win32_VideoController mostra GPUs reconhecidas pelo driver, mas
+# AdapterRAM pode ser limitado a 4 GB e memoria compartilhada nao e VRAM dedicada.
+$gpuControllers=@(S { Get-CimInstance Win32_VideoController | Where-Object { $_.Name } })
+$gpus=@($gpuControllers | ForEach-Object {
+ $g=$_
+ $name=[string]$g.Name
+ $possibleType='Nao confirmado'
+ if($name -match '(?i)intel.*(uhd|iris|hd graphics|arc graphics)' -and $name -notmatch '(?i)intel arc (a[0-9]|b[0-9])'){$possibleType='Integrada (provavel)'}
+ elseif($name -match '(?i)nvidia.*(geforce|quadro|rtx|gtx|tesla|t[0-9]+)' -or $name -match '(?i)radeon\s+rx\s*[0-9]'){$possibleType='Dedicada (provavel)'}
+ $memBytes=0
+ try { $memBytes=[double]$g.AdapterRAM } catch {}
+ $reportedGB=$null
+ if($memBytes -gt 0 -and $memBytes -lt 4294960000 -and $possibleType -notmatch 'Integrada'){
+   $reportedGB=[math]::Round($memBytes/1GB,2)
+ }
+ [ordered]@{
+  Model=$name
+  Manufacturer=[string]$g.AdapterCompatibility
+  PossibleType=$possibleType
+  ReportedMemoryGB=$reportedGB
+  DriverVersion=[string]$g.DriverVersion
+  Status=[string]$g.Status
+ }
+})
+$gpuType='Nao confirmado'
+if($gpus.Count -gt 0){
+ $hasI=@($gpus|Where-Object { $_.PossibleType -match '^Integrada' }).Count -gt 0
+ $hasD=@($gpus|Where-Object { $_.PossibleType -match '^Dedicada' }).Count -gt 0
+ if($hasI -and $hasD){$gpuType='Integrada + dedicada (provavel)'}
+ elseif($hasI -and -not $hasD -and $gpus.Count -eq 1){$gpuType='Integrada (provavel)'}
+ elseif($hasD -and -not $hasI -and $gpus.Count -eq 1){$gpuType='Dedicada (provavel)'}
+}
 $ram=@(S { Get-CimInstance Win32_PhysicalMemory | Select-Object Manufacturer,PartNumber,Speed,@{n='CapacityGB';e={[math]::Round($_.Capacity/1GB,2)}} })
 # A classe Win32_DiskDrive informa capacidade, mas seu MediaType geralmente nao distingue SSD de HD.
 $physicalDisks=@(S { Get-PhysicalDisk | Select-Object FriendlyName,SerialNumber,MediaType,BusType,HealthStatus,OperationalStatus,@{n='SizeGB';e={[math]::Round($_.Size/1GB,2)}} })
@@ -52,7 +84,7 @@ $adapters=@(S { Get-NetAdapter | Where-Object Status -eq 'Up' | Select-Object Na
 $paths=@('HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*','HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*')
 $apps=@(S { Get-ItemProperty $paths | Where-Object DisplayName | Select-Object DisplayName,DisplayVersion,Publisher,InstallDate | Sort-Object DisplayName -Unique })
 $obj=[ordered]@{
- collector='uCode Inventario Windows v2'
+ collector='uCode Inventario Windows v3'
  collectedAt=(Get-Date).ToString('o')
  hostname=$env:COMPUTERNAME
  serial=[string]$bios.SerialNumber
@@ -61,6 +93,8 @@ $obj=[ordered]@{
  cpu=[string]$processor.Name
  ramGB=[math]::Round(($pc.TotalPhysicalMemory / 1GB),1)
  ramModules=$ram
+ gpus=$gpus
+ gpuType=$gpuType
  os=[string]$os.Caption
  osVersion=[string]$os.Version
  windowsBuild=[string]$os.BuildNumber
