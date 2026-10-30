@@ -1,0 +1,23 @@
+name: Verificar publicação uCode Inventário
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'inventario-ucode/**'
+      - '.github/workflows/ucode-verificacao.yml'
+  workflow_dispatch:
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Testar interface e API
+        run: |
+          set -euxo pipefail
+          curl -fsSL --retry 5 --retry-all-errors --retry-delay 10 --max-time 20 "https://dev-gabriel-exe.github.io/inventario-ucode/" -o /tmp/app.html
+          grep -q "Inventário Tecnológico" /tmp/app.html
+          curl -fsSL --retry 5 --retry-all-errors --retry-delay 10 --max-time 20 "https://dev-gabriel-exe.github.io/inventario-ucode/coleta.ps1" -o /tmp/coleta.ps1
+          grep -q "uCode Inventario" /tmp/coleta.ps1
+          curl -fsSL --retry 5 --retry-all-errors --retry-delay 10 --max-time 20 "https://ucode-inventario-recuperacao-garbems-projects.vercel.app/api?action=ping" -o /tmp/api.json
+          cat /tmp/api.json
+          node -e "const a=require('/tmp/api.json');if(!a.ok)process.exit(1)"
+          echo "Site, script e API públicos acessíveis"
