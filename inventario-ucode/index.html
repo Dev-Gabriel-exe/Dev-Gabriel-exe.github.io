@@ -498,13 +498,19 @@ $("reportRefresh").onclick=async()=>{
 };
 $("pdfBtn").onclick=async()=>{
  const button=$("pdfBtn");button.disabled=true;
+ const original=button.textContent;button.textContent="Preparando PDF...";
  try{
   await loadCloudForReport();
   renderReport();
   if(!state.assets.length){feedback("Não existem equipamentos salvos para imprimir.",true);return}
+  const images=[...$("reportOutput").querySelectorAll("img")];
+  await Promise.all(images.map(async img=>{
+   if(img.complete)return;
+   if(typeof img.decode==="function"){try{await img.decode()}catch{}}
+  }));
   window.print();
  }catch(e){feedback("Impressão cancelada: falha na atualização da nuvem. "+e.message,true)}
- finally{button.disabled=false}
+ finally{button.disabled=false;button.textContent=original}
 };
 function download(filename,content,type){const url=URL.createObjectURL(new Blob([content],{type})),a=document.createElement("a");a.href=url;a.download=filename;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000)}
 $("csvBtn").onclick=()=>{const cols=["id","kind","label","serial","hostname","sector","location","owner","manufacturer","model","os","windowsInstallDate","windowsElapsed","age","cpu","ramGB","gpu","gpuType","gpuManufacturer","gpuMemoryValue","gpuMemoryUnit","gpuMemoryGB","gpuDriver","gpuDetails","storageType","storageTotalGB","storageFreeGB","storage","ip","networkType","connectedTo","gateway","wifiSsid","networkRole","serviceProvider","internetPlan","wanType","wanIp","networkMode","subnet","dhcpStatus","lanPorts","wanPorts","poePorts","ethernetSpeed","firmware","networkPower","networkTopology","networkObservations","wifiBands","wifiStandard","wifiGuest","wifiSecurityMode","accessPointCount","accessPointLocations","coverageAreas","wifiSignal","wifiChannel","meshBackhaul","physical","performance","softwarePaid","priority","faults","actions"];const rows=[cols.join(";"),...state.assets.map(a=>cols.map(k=>{let v=k==="windowsElapsed"?(a.data?.windowsInstallDate?windowsElapsed(a.data.windowsInstallDate):""):["id","kind","label"].includes(k)?a[k]:a.data?.[k];return '"'+String(v||"").replace(/"/g,'""')+'"'}).join(";"))];download("ucode_inventario.csv","\uFEFF"+rows.join("\n"),"text/csv;charset=utf-8")};
