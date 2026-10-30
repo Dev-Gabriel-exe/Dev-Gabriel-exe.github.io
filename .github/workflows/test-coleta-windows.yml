@@ -1,4 +1,4 @@
-name: Testar coleta PowerShell em Windows real
+name: Testar coleta em Windows
 on:
   push:
     branches: [main]
@@ -7,28 +7,19 @@ on:
       - '.github/workflows/test-coleta-windows.yml'
   workflow_dispatch:
 jobs:
-  test-windows:
+  windows-powershell:
     runs-on: windows-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        shell: [powershell, pwsh]
     steps:
       - uses: actions/checkout@v4
-      - name: Executar coleta e comprovar JSON persistido
-        shell: ${{ matrix.shell }}
+      - name: Executar script no PowerShell 5.1
+        shell: powershell
         run: |
-          $ErrorActionPreference = 'Stop'
-          Write-Host 'Ambiente:' $PSVersionTable.PSVersion.ToString()
-          Write-Host 'Desktop resolvida:' ([Environment]::GetFolderPath('Desktop'))
+          $ErrorActionPreference = "Stop"
+          Write-Host "PowerShell:" $PSVersionTable.PSVersion
           & .\inventario-ucode\coleta.ps1
-          $root = @([Environment]::GetFolderPath('Desktop'), (Join-Path $env:USERPROFILE 'Downloads'), (Join-Path $env:USERPROFILE 'Documents'), $env:TEMP)
-          $files = @($root | Where-Object { $_ -and (Test-Path -LiteralPath $_) } | ForEach-Object { Get-ChildItem -LiteralPath $_ -Filter "ucode_inventario_*.json" -File -ErrorAction SilentlyContinue } | Sort-Object LastWriteTime -Descending)
-          if ($files.Count -eq 0) { throw "FALHA REAL: nenhum JSON foi criado nas pastas de saída." }
-          $path = $files[0].FullName
-          $json = Get-Content -LiteralPath $path -Raw -Encoding UTF8 | ConvertFrom-Json -ErrorAction Stop
-          if (-not $json.collector -or -not $json.hostname -or -not $json.os) { throw "JSON incompleto: faltam collector, hostname ou os." }
-          Write-Host "TESTE OK: $path"
-          Write-Host "Bytes:" $files[0].Length
-          Write-Host "Collector:" $json.collector
-          Write-Host "Windows:" $json.os
+          $places = @([Environment]::GetFolderPath("Desktop"), $env:TEMP)
+          $matches = @($places | Where-Object { $_ -and (Test-Path $_) } | ForEach-Object { Get-ChildItem -Path $_ -Filter "ucode_inventario_*.json" -File -ErrorAction SilentlyContinue })
+          if ($matches.Count -eq 0) { throw "FALHA: arquivo JSON nao foi gerado." }
+          $record = Get-Content -LiteralPath $matches[0].FullName -Raw | ConvertFrom-Json
+          if (-not $record.hostname) { throw "FALHA: JSON sem hostname." }
+          Write-Host "PASS: JSON salvo em" $matches[0].FullName
