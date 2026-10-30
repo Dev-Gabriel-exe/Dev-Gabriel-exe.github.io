@@ -4,6 +4,8 @@ $ErrorActionPreference = 'SilentlyContinue'
 function S($b) { try { & $b } catch { $null } }
 $pc=S { Get-CimInstance Win32_ComputerSystem }
 $os=S { Get-CimInstance Win32_OperatingSystem }
+# A data de instalacao pode mudar com reinstalacao ou atualizacoes do Windows.
+$windowsInstallDate=S { if($os.InstallDate){([datetime]$os.InstallDate).ToString('yyyy-MM-dd')} else {''} }
 $bios=S { Get-CimInstance Win32_BIOS }
 $processor=S { Get-CimInstance Win32_Processor | Select-Object -First 1 }
 # GPUs: Win32_VideoController mostra GPUs reconhecidas pelo driver, mas
@@ -84,7 +86,7 @@ $adapters=@(S { Get-NetAdapter | Where-Object Status -eq 'Up' | Select-Object Na
 $paths=@('HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*','HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*')
 $apps=@(S { Get-ItemProperty $paths | Where-Object DisplayName | Select-Object DisplayName,DisplayVersion,Publisher,InstallDate | Sort-Object DisplayName -Unique })
 $obj=[ordered]@{
- collector='uCode Inventario Windows v3'
+ collector='uCode Inventario Windows v4'
  collectedAt=(Get-Date).ToString('o')
  hostname=$env:COMPUTERNAME
  serial=[string]$bios.SerialNumber
@@ -97,6 +99,7 @@ $obj=[ordered]@{
  gpuType=$gpuType
  os=[string]$os.Caption
  osVersion=[string]$os.Version
+ windowsInstallDate=[string]$windowsInstallDate
  windowsBuild=[string]$os.BuildNumber
  lastBoot=[string]$os.LastBootUpTime
  disks=$disks
